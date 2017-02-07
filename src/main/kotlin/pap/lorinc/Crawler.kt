@@ -103,7 +103,7 @@ object Crawler {
             |${echo("to install gradle, type: sudo add-apt-repository ppa:cwchien/gradle && sudo apt-get update && sudo apt-get install gradle")}
             |${echo("[![Build Status](https://travis-ci.org/${userName}/CodingBatSolutions.png)](https://travis-ci.org/${userName}/CodingBatSolutions)\n\nSolutions to my [CodingBat](http://codingbat.com/java) exercises, exported by [CodingBat2GitHub](https://github.com/paplorinc/CodingBat2GitHub).")} > README.md
             |${echo("language: groovy\n\njdk: oraclejdk8\n\nbefore_install: chmod +x gradlew\nscript: ./ gradlew clean build --stacktrace")} > .travis.yml
-            |gradle init --type java-library --test-framework spock && rm src/test/groovy/LibraryTest.groovy && rm src/main/java/Library.java && gradle build
+            |gradle init --type java-library --test-framework spock && rm src/test/groovy/LibraryTest.groovy && rm src/main/java/Library.java && git add -A && gradle build
             |
             """.trimMargin()
         if (skip > 0) git
