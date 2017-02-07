@@ -81,7 +81,7 @@ object Crawler {
             |mkdir -p '${mainJava}' '${testSpock}'
             |${echo(generateMain(info))} > ${mainJava}/${info.className}.java
             |${echo(generateTest(info, testClassName))}> ${testSpock}/${testClassName}.groovy
-            |git add src/*
+            |git add src
             |git commit -m "${info.packageName} / ${info.className}"
             |
             """.trimMargin()
