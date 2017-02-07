@@ -9,8 +9,9 @@ data class Problem(val packageName: String, val className: String, val methodNam
 object Crawler {
     val base = "http://codingbat.com"
 
-    val userId   = "" // type in your userId here
-    val password = "" // type in your password here
+    var userId   = "" // your userId here
+    var password = "" // your password here
+    var skip     = 0  // your finished and committed exercise count
 
     @JvmStatic fun main(args: Array<String>) {
         val contents = parseContent()
@@ -22,7 +23,7 @@ object Crawler {
         val cookies = login()
 
         val doc = Jsoup.connect("$base/done").cookies(cookies).get()
-        val links = doc.select("a[href^=/prob/]").map { base + it.attr("href") }
+        val links = doc.select("a[href^=/prob/]").map { base + it.attr("href") }.drop(skip)
         links.map { probLink ->
             val prob = Jsoup.connect(probLink).cookies(cookies).get()
             val id = prob.select("input[name=id]").first().attr("value")
@@ -96,7 +97,8 @@ object Crawler {
             |gradle init --type java-library --test-framework spock && rm src/test/groovy/LibraryTest.groovy && rm src/main/java/Library.java && gradle build
             |
             """.trimMargin()
-        before + git + after
+        if (skip > 0) git
+        else before + git + after
     }
 
     private fun generateMain(info: Problem) =
