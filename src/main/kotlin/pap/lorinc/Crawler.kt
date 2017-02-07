@@ -21,9 +21,9 @@ object Crawler {
     }
 
     private fun init(args: Array<String>) {
-        userId = args.getOrElse(0) { i -> userId }
-        password = args.getOrElse(1) { i -> password }
-        skip = args.getOrElse(2) { i -> skip.toString() }.toInt()
+        userId = args.getOrElse(0) { userId }
+        password = args.getOrElse(1) { password }
+        skip = args.getOrElse(2) { skip.toString() }.toInt()
         assert(userId.isNotEmpty() && password.isNotEmpty() && skip >= 0) { "You need to provide some authentication info!" }
     }
 
