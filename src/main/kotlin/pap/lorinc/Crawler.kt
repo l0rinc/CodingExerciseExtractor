@@ -4,7 +4,7 @@ import org.jsoup.Connection
 import org.jsoup.Jsoup
 
 data class Test(val methodCall: String, val expected: String)
-data class Problem(val packageName: String, val className: String, val methodName: String, val link: String, val description: String, val content: String, val tests: List<Test>)
+data class Problem(val packageName: String, val className: String, val methodName: String, val link: String, val date: String, val description: String, val content: String, val tests: List<Test>)
 
 object Crawler {
     val base = "http://codingbat.com"
@@ -29,23 +29,24 @@ object Crawler {
 
     private fun parseContent() = {
         val cookies = login()
+        Jsoup.connect("$base/done").cookies(cookies).get()
+             .select("a[href^=/prob/]").drop(skip)
+             .map { prob ->
+                 val probLink = base + prob.attr("href")
+                 val probDoc = Jsoup.connect(probLink).cookies(cookies).get()
 
-        val doc = Jsoup.connect("$base/done").cookies(cookies).get()
-        val links = doc.select("a[href^=/prob/]").map { base + it.attr("href") }.drop(skip)
-        links.map { probLink ->
-            val prob = Jsoup.connect(probLink).cookies(cookies).get()
-            val id = prob.select("input[name=id]").first().attr("value")
-            assert(probLink.endsWith(id))
+                 val packageName = probDoc.select("body > div.tabc > div > div > a:nth-child(1) > span").first().text().replace(Regex("\\W+"), "_").toLowerCase()
+                 val methodName = probDoc.select("body > div.tabc > div > div > span").first().text()
+                 val className = methodName.capitalize()
+                 val date = prob.nextSibling().nextSibling().childNode(0).toString()
+                 val description = probDoc.select("div.minh").first().text().trim()
+                 val content = probDoc.select("#ace_div").first().textNodes().first().wholeText.trim()
 
-            val packageName = prob.select("body > div.tabc > div > div > a:nth-child(1) > span").first().text().replace(Regex("\\W+"), "_").toLowerCase()
-            val methodName = prob.select("body > div.tabc > div > div > span").first().text()
-            val className = methodName.capitalize()
-            val description = prob.select("div.minh").first().text().trim()
-            val content = prob.select("#ace_div").first().textNodes().first().wholeText.trim()
-            val tests = getTests(content, cookies, id)
+                 val id = probDoc.select("input[name=id]").first().attr("value")
+                 val tests = getTests(content, cookies, id)
 
-            Problem(packageName, className, methodName, probLink, description, content, tests);
-        }
+                 Problem(packageName, className, methodName, probLink, date, description, content, tests);
+             }
     }
 
     private fun login(): Map<String, String> {
@@ -90,7 +91,7 @@ object Crawler {
             |${echo(generateMain(info))} > ${mainJava}/${info.className}.java
             |${echo(generateTest(info, testClassName))}> ${testSpock}/${testClassName}.groovy
             |git add src
-            |git commit -m "${info.packageName} / ${info.className}"
+            |git commit -m "${info.packageName} / ${info.className}" --date="${info.date}"
             |
             """.trimMargin()
         }.joinToString("\n")
