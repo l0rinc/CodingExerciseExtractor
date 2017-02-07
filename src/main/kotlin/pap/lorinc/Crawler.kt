@@ -14,9 +14,17 @@ object Crawler {
     var skip     = 0  // your finished and committed exercise count
 
     @JvmStatic fun main(args: Array<String>) {
+        init(args)
         val contents = parseContent()
         val commands = generateCommands(contents())
         println(commands())
+    }
+
+    private fun init(args: Array<String>) {
+        userId = args.getOrElse(0) { i -> userId }
+        password = args.getOrElse(1) { i -> password }
+        skip = args.getOrElse(2) { i -> skip.toString() }.toInt()
+        assert(userId.isNotEmpty() && password.isNotEmpty() && skip >= 0) { "You need to provide some authentication info!" }
     }
 
     private fun parseContent() = {
