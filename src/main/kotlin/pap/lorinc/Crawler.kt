@@ -77,70 +77,70 @@ object Crawler {
 
     private fun generateCommands(contents: List<Problem>) = {
         val before = """
-            |
-            |git init
-            |
-            """.trimMargin()
+            >
+            >git init
+            >
+            """.trimMargin(">")
 
         val git = contents.map { info ->
             val testClassName = "${info.className}Test"
             val (mainJava, testSpock) = arrayOf("main/java", "test/groovy").map { "src/${it}/${info.packageName}" }
             """
-            |
-            |mkdir -p '${mainJava}' '${testSpock}'
-            |${echo(generateMain(info))} > ${mainJava}/${info.className}.java
-            |${echo(generateTest(info, testClassName))}> ${testSpock}/${testClassName}.groovy
-            |git add src
-            |git commit -m "${info.packageName} / ${info.className}" --date="${info.date}"
-            |
-            """.trimMargin()
+            >
+            >mkdir -p '${mainJava}' '${testSpock}'
+            >${echo(generateMain(info))} > ${mainJava}/${info.className}.java
+            >${echo(generateTest(info, testClassName))}> ${testSpock}/${testClassName}.groovy
+            >git add src
+            >git commit -m "${info.packageName} / ${info.className}" --date="${info.date}"
+            >
+            """.trimMargin(">")
         }.joinToString("\n")
 
         val userName = userId.replace(Regex("@.+$"), "")
         val after = """
-            |
-            |
-            |${echo("to install gradle, type: sudo add-apt-repository ppa:cwchien/gradle && sudo apt-get update && sudo apt-get install gradle")}
-            |${echo("[![Build Status](https://travis-ci.org/${userName}/CodingBatSolutions.png)](https://travis-ci.org/${userName}/CodingBatSolutions)\n\nSolutions to my [CodingBat](http://codingbat.com/java) exercises, exported by [CodingBat2GitHub](https://github.com/paplorinc/CodingBat2GitHub).")} > README.md
-            |${echo("language: groovy\n\njdk: oraclejdk8\n\nbefore_install: chmod +x gradlew\nscript: ./gradlew clean build --stacktrace")} > .travis.yml
-            |gradle init --type java-library --test-framework spock && rm src/test/groovy/LibraryTest.groovy && rm src/main/java/Library.java && git add -A && gradle build
-            |
-            """.trimMargin()
+            >
+            >
+            >${echo("to install gradle, type: sudo add-apt-repository ppa:cwchien/gradle && sudo apt-get update && sudo apt-get install gradle")}
+            >${echo("[![Build Status](https://travis-ci.org/${userName}/CodingBatSolutions.png)](https://travis-ci.org/${userName}/CodingBatSolutions)\n\nSolutions to my [CodingBat](http://codingbat.com/java) exercises, exported by [CodingBat2GitHub](https://github.com/paplorinc/CodingBat2GitHub).")} > README.md
+            >${echo("language: groovy\n\njdk: oraclejdk8\n\nbefore_install: chmod +x gradlew\nscript: ./gradlew clean build --stacktrace")} > .travis.yml
+            >gradle init --type java-library --test-framework spock && rm src/test/groovy/LibraryTest.groovy && rm src/main/java/Library.java && git add -A && gradle build
+            >
+            """.trimMargin(">")
         if (skip > 0) git
         else before + git + after
     }
 
     private fun generateMain(info: Problem) =
         """
-        |package ${info.packageName};
-        |
-        |import java.util.*;
-        |
-        |/**
-        | * ${info.description.lines().map { it.trim() }.joinToString("\n * ")}
-        | * Source: ${info.link}
-        | */
-        |public class ${info.className} {
-        |  ${info.content.lines().joinToString("\n  ").trim()}
-        |}
-        |""".trimMargin()
+        >package ${info.packageName};
+        >
+        >import java.util.*;
+        >
+        >/**
+        > * ${info.description.lines().map { it.trim() }.joinToString("\n * ")}
+        > * Source: ${info.link}
+        > */
+        >public class ${info.className} {
+        >  ${info.content.lines().joinToString("\n  ").trim()}
+        >}
+        >""".trimMargin(">")
 
     private fun generateTest(info: Problem, testClassName: String) =
         """
-        |package ${info.packageName};
-        |
-        |import spock.lang.Specification
-        |
-        |class ${testClassName} extends Specification {
-        |  def '${info.methodName}'() {
-        |    setup:
-        |      def subject = new ${info.className}()
-        |    expect:
-        |${info.tests.map { test -> """
-        |      subject.${fix(info, test)} == ${fix(test)}""".trimMargin() }.joinToString("\n")}
-        |  }
-        |}
-        |""".trimMargin()
+        >package ${info.packageName};
+        >
+        >import spock.lang.Specification
+        >
+        >class ${testClassName} extends Specification {
+        >  def '${info.methodName}'() {
+        >    setup:
+        >      def subject = new ${info.className}()
+        >    expect:
+        >${info.tests.map { test -> """
+        >      subject.${fix(info, test)} == ${fix(test)}""".trimMargin(">") }.joinToString("\n")}
+        >  }
+        >}
+        >""".trimMargin(">")
 
     private fun fix(test: Test) = test.expected.replace("Th a FH", "Th  a FH")
     private fun fix(info: Problem, test: Test): String {
