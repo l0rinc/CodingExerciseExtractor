@@ -62,10 +62,8 @@ object Crawler {
 
     private fun getTests(content: String, cookies: Map<String, String>, id: String): List<Test> {
         val testsDoc = Jsoup.connect("$base/run")
-                            .cookies(cookies)
                             .data("id", id)
                             .data("code", content)
-                            .data("cuname", userId)
                             .post()
         val delimiter = " → "
         val tests = testsDoc.select("#tests > table > tbody > tr > td:nth-child(1)").map { it.text() }.filter { it.contains(delimiter) }.map {
