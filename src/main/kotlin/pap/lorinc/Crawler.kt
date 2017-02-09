@@ -104,7 +104,7 @@ object Crawler {
             >gradle init --type java-library --test-framework spock && rm src/test/groovy/LibraryTest.groovy && rm src/main/java/Library.java && git add -A && gradle build
             >
             """.trimMargin(">")
-        if (skip > 0) git
+        if (skip > 0) git + "gradle build"
         else before + git + after
     }
 
