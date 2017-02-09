@@ -142,7 +142,7 @@ object Crawler {
 
     private fun fix(test: Test) = test.expected.replace("Th a FH", "Th  a FH")
     private fun fix(info: Problem, test: Test): String {
-        var result = test.methodCall.replace('"', '\'')
+        var result = test.methodCall.replace('"', '\'').replace('{', '[').replace('}', ']');
         val declaration = info.content.lines().first()
         if (declaration.contains("int[]")) result = result.replace("]", "] as int[]")
         else if (declaration.contains("String[]")) result = result.replace("]", "] as String[]")
