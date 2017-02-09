@@ -43,7 +43,7 @@ object Crawler {
                  val content = probDoc.select("#ace_div").first().textNodes().first().wholeText.trim()
 
                  val id = probDoc.select("input[name=id]").first().attr("value")
-                 val tests = getTests(content, cookies, id)
+                 val tests = getTests(content, id)
 
                  Problem(packageName, className, methodName, probLink, date, description, content, tests);
              }
@@ -60,7 +60,7 @@ object Crawler {
                     .cookies()
     }
 
-    private fun getTests(content: String, cookies: Map<String, String>, id: String): List<Test> {
+    private fun getTests(content: String, id: String): List<Test> {
         val testsDoc = Jsoup.connect("$base/run")
                             .data("id", id)
                             .data("code", content)
