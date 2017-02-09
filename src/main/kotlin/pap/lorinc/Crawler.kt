@@ -121,7 +121,7 @@ object Crawler {
         >public class ${info.className} {
         >  ${info.content.lines().joinToString("\n  ").trim()}
         >}
-        >""".trimMargin(">")
+        >""".trimMargin(">").trim()
 
     private fun generateTest(info: Problem, testClassName: String) =
         """
@@ -138,7 +138,7 @@ object Crawler {
         >      subject.${fix(info, test)} == ${fix(test)}""".trimMargin(">") }.joinToString("\n")}
         >  }
         >}
-        >""".trimMargin(">")
+        >""".trimMargin(">").trim()
 
     private fun fix(test: Test) = test.expected.replace("Th a FH", "Th  a FH")
     private fun fix(info: Problem, test: Test): String {
