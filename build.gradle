@@ -12,32 +12,29 @@ buildscript {
     ext.jsoup_version = '1.10.2'
     ext.spek_version = '1.1.0'
 
-    repositories {
-        mavenCentral()
-    }
+    repositories { mavenCentral() }
     dependencies {
-        classpath group: 'org.jetbrains.kotlin', name: 'kotlin-gradle-plugin', version: kotlin_version
-        classpath group: 'org.junit.platform', name: 'junit-platform-gradle-plugin', version: junit_platform_version
-
+        classpath(
+                [group: 'org.jetbrains.kotlin', name: 'kotlin-gradle-plugin', version: kotlin_version],
+                [group: 'org.junit.platform', name: 'junit-platform-gradle-plugin', version: junit_platform_version]
+        )
     }
 }
 
 apply plugin: 'kotlin'
 apply plugin: 'org.junit.platform.gradle.plugin'
 
-junitPlatform {
-    filters {
-        engines {
-            include 'spek'
-        }
-    }
-}
+junitPlatform { filters { engines { include 'spek' } } }
 
 dependencies {
     compile([group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: kotlin_version],
-            [group: 'org.jsoup', name: 'jsoup', version: jsoup_version],
+            [group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlin_version],
+            [group: 'org.jsoup', name: 'jsoup', version: jsoup_version]
     )
 
-    testCompile([group: 'org.jetbrains.spek', name: 'spek-api', 'version': spek_version])
+    testCompile(
+            [group: 'org.jetbrains.spek', name: 'spek-api', 'version': spek_version],
+            [group: 'org.jetbrains.kotlin', name: 'kotlin-test', version: kotlin_version]
+    )
     testRuntime([group: 'org.jetbrains.spek', name: 'spek-junit-platform-engine', version: spek_version])
 }
