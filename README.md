@@ -1,6 +1,6 @@
-#Open source your [CodingBat](http://codingbat.com/java) exercises to GitHub
+# Open source your [CodingBat](http://codingbat.com/java) exercises to GitHub
  
-##Steps:
+## Steps:
 * Import the provided `Kotlin`&`Jsoup` script in `Idea`;
 * Add your `CodingBat` `username` and `password` to the script (optionally followed by the number of exercises to skip);
   * or add them as arguments, in the same order;
@@ -9,5 +9,5 @@
 * Paste and run the content of the generated commands in the terminal, in the empty folder where you want the files to be placed;
 * Sit back and relax while `git` is initialized, the solutions and tests are committed and a `Gradle` project structure is generated.
    
-#Example:
+# Example:
 See my own exported solutions at: https://github.com/paplorinc/CodingBatSolutions 
