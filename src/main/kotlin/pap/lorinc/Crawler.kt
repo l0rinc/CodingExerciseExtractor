@@ -4,7 +4,7 @@ import org.jsoup.Connection
 import org.jsoup.Jsoup
 
 data class Test(val methodCall: String, val expected: String)
-data class Problem(val packageName: String, val className: String, val methodName: String, val link: String, val date: String, val description: String, val content: String, val tests: List<Test>)
+data class CodingBatProblem(val packageName: String, val className: String, val methodName: String, val link: String, val date: String, val description: String, val content: String, val tests: List<Test>)
 
 object Crawler {
     val base = "http://codingbat.com"
@@ -45,7 +45,7 @@ object Crawler {
                  val id = probDoc.select("input[name=id]").first().attr("value")
                  val tests = getTests(content, id)
 
-                 Problem(packageName, className, methodName, probLink, date, description, content, tests);
+                 CodingBatProblem(packageName, className, methodName, probLink, date, description, content, tests);
              }
     }
 
@@ -73,7 +73,7 @@ object Crawler {
         return tests
     }
 
-    private fun generateCommands(contents: List<Problem>) = {
+    private fun generateCommands(contents: List<CodingBatProblem>) = {
         val before = """
             >
             >git init
@@ -108,7 +108,7 @@ object Crawler {
         else before + git + after
     }
 
-    private fun generateMain(info: Problem) =
+    private fun generateMain(info: CodingBatProblem) =
         """
         >package ${info.packageName};
         >
@@ -123,7 +123,7 @@ object Crawler {
         >}
         >""".trimMargin(">").trim()
 
-    private fun generateTest(info: Problem, testClassName: String) =
+    private fun generateTest(info: CodingBatProblem, testClassName: String) =
         """
         >package ${info.packageName};
         >
@@ -141,7 +141,7 @@ object Crawler {
         >""".trimMargin(">").trim()
 
     private fun fix(test: Test) = test.expected.replace("Th a FH", "Th  a FH")
-    private fun fix(info: Problem, test: Test): String {
+    private fun fix(info: CodingBatProblem, test: Test): String {
         var result = test.methodCall.replace('"', '\'').replace('{', '[').replace('}', ']');
         val declaration = info.content.lines().first()
         if (declaration.contains("int[]")) result = result.replace("]", "] as int[]")
