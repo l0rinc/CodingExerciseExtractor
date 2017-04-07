@@ -8,7 +8,7 @@ repositories {
 
 buildscript {
     ext.kotlin_version = '1.1.1'
-    ext.junit_platform_version = '1.0.0-M4'
+    ext.junit_platform_version = '1.0.0-M3'
     ext.jsoup_version = '1.10.2'
     ext.spek_version = '1.1.0'
 
@@ -34,7 +34,8 @@ dependencies {
 
     testCompile(
             [group: 'org.jetbrains.spek', name: 'spek-api', 'version': spek_version],
-            [group: 'org.jetbrains.kotlin', name: 'kotlin-test', version: kotlin_version]
+            [group: 'org.jetbrains.kotlin', name: 'kotlin-test', version: kotlin_version],
+            [group: 'org.junit.platform', name: 'junit-platform-console', version: junit_platform_version]
     )
     testRuntime([group: 'org.jetbrains.spek', name: 'spek-junit-platform-engine', version: spek_version])
 }
