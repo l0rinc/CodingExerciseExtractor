@@ -35,7 +35,7 @@ object Crawler {
                  val probLink = base + prob.attr("href")
                  val probDoc = Jsoup.connect(probLink).cookies(cookies).get()
 
-                 val packageName = probDoc.select("body > div.tabc > div > div > a:nth-child(1) > span").first().text().replace(Regex("\\W+"), "_").toLowerCase()
+                 val packageName = probDoc.select("body > div.tabc > div > div > a:nth-child(1) > span").first().text().replace(Regex("""\W+"""), "_").toLowerCase()
                  val methodName = probDoc.select("body > div.tabc > div > div > span").first().text()
                  val className = methodName.capitalize()
                  val date = prob.nextSibling().nextSibling().childNode(0).toString()
@@ -45,7 +45,7 @@ object Crawler {
                  val id = probDoc.select("input[name=id]").first().attr("value")
                  val tests = getTests(content, id)
 
-                 CodingBatProblem(packageName, className, methodName, probLink, date, description, content, tests);
+                 CodingBatProblem(packageName, className, methodName, probLink, date, description, content, tests)
              }
     }
 
@@ -82,12 +82,12 @@ object Crawler {
 
         val git = contents.map { info ->
             val testClassName = "${info.className}Test"
-            val (mainJava, testSpock) = arrayOf("main/java", "test/groovy").map { "src/${it}/${info.packageName}" }
+            val (mainJava, testSpock) = arrayOf("main/java", "test/groovy").map { "src/$it/${info.packageName}" }
             """
             >
-            >mkdir -p '${mainJava}' '${testSpock}'
-            >${echo(generateMain(info))} > ${mainJava}/${info.className}.java
-            >${echo(generateTest(info, testClassName))}> ${testSpock}/${testClassName}.groovy
+            >mkdir -p '$mainJava' '$testSpock'
+            >${echo(generateMain(info))} > $mainJava/${info.className}.java
+            >${echo(generateTest(info, testClassName))}> $testSpock/$testClassName.groovy
             >git add src
             >git commit -m "${info.packageName} / ${info.className}" --date="${info.date}"
             >
@@ -99,7 +99,7 @@ object Crawler {
             >
             >
             >${echo("to install gradle, type: sudo add-apt-repository ppa:cwchien/gradle && sudo apt-get update && sudo apt-get install gradle")}
-            >${echo("[![Build Status](https://travis-ci.org/${userName}/CodingBatSolutions.png)](https://travis-ci.org/${userName}/CodingBatSolutions)\n\nSolutions to my [CodingBat](http://codingbat.com/java) exercises, exported by [CodingBat2GitHub](https://github.com/paplorinc/CodingBat2GitHub).")} > README.md
+            >${echo("[![Build Status](https://travis-ci.org/$userName/CodingBatSolutions.png)](https://travis-ci.org/$userName/CodingBatSolutions)\n\nSolutions to my [CodingBat](http://codingbat.com/java) exercises, exported by [CodingBat2GitHub](https://github.com/paplorinc/CodingBat2GitHub).")} > README.md
             >${echo("language: groovy\n\njdk: oraclejdk8\n\nbefore_install: chmod +x gradlew\nscript: ./gradlew clean build --stacktrace")} > .travis.yml
             >gradle init --type java-library --test-framework spock && rm src/test/groovy/LibraryTest.groovy && rm src/main/java/Library.java && git add -A && gradle build
             >
@@ -115,7 +115,7 @@ object Crawler {
         >import java.util.*;
         >
         >/**
-        > * ${info.description.lines().map { it.trim() }.joinToString("\n * ")}
+        > * ${info.description.lines().map(String::trim).joinToString("\n * ")}
         > * Source: ${info.link}
         > */
         >public class ${info.className} {
@@ -129,7 +129,7 @@ object Crawler {
         >
         >import spock.lang.Specification
         >
-        >class ${testClassName} extends Specification {
+        >class $testClassName extends Specification {
         >  def '${info.methodName}'() {
         >    setup:
         >      def subject = new ${info.className}()
@@ -142,12 +142,12 @@ object Crawler {
 
     private fun fix(test: Test) = test.expected.replace("Th a FH", "Th  a FH")
     private fun fix(info: CodingBatProblem, test: Test): String {
-        var result = test.methodCall.replace('"', '\'').replace('{', '[').replace('}', ']');
+        var result = test.methodCall.replace('"', '\'').replace('{', '[').replace('}', ']')
         val declaration = info.content.lines().first()
         if (declaration.contains("int[]")) result = result.replace("]", "] as int[]")
         else if (declaration.contains("String[]")) result = result.replace("]", "] as String[]")
         return result
     }
 
-    private fun echo(text: String) = """echo -e $'${text.replace("\\", "\\\\\\\\").replace("'", "\\'").replace("\n", "\\n")}'"""
+    fun echo(text: String): String = "echo -e $'${text.replace("""\""", """\\\\""").replace("'", """\'""").replace("\n", """\n""")}'"
 }
