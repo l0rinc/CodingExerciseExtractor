@@ -8,7 +8,9 @@ It will generate a series of `git` commits (as command line script) for each exe
 It will also add a basic `gradle` build and run it after the script is run.
 
 ### Example:
-See my own exported solutions at: [CodingBatSolutions](https://github.com/paplorinc/CodingBatSolutions) 
+See my own exported solutions at:
+* [CodingBatSolutions](https://github.com/paplorinc/CodingBatSolutions) 
+* [LeetCodeSolutions](https://github.com/paplorinc/LeetCodeSolutions) 
 
 ### Steps:
 * Import the provided `Kotlin` & `Jsoup` script in `Idea`;

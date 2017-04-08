@@ -146,7 +146,7 @@ object Crawler2 {
         >
         >/**
         > * ${info.description.lines().map(String::trim).joinToString("\n * ")}
-        >
+        > *
         > * Source: ${info.link}
         > */
         >${info.solution}
