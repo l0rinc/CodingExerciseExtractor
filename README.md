@@ -1,16 +1,16 @@
-# Export your [CodingBat](http://codingbat.com/java) & [LeetCode](https://leetcode.com/problemset/algorithms) solutions to GitHub
- 
-# Descripion
+## Export your [CodingBat](http://codingbat.com/java) & [LeetCode](https://leetcode.com/problemset/algorithms) solutions to GitHub
+
+### Descripion
 This crawler will gather all your solved exercises, their descriptions, submit times, difficulty and even tests, if possible.
 
 It will generate a series of `git` commits (as command line script) for each exercise, with the correct date, message and content.
 
 It will also add a basic `gradle` build and run it after the script is run.
- 
-# Example:
+
+### Example:
 See my own exported solutions at: [CodingBatSolutions](https://github.com/paplorinc/CodingBatSolutions) 
 
-## Steps:
+### Steps:
 * Import the provided `Kotlin` & `Jsoup` script in `Idea`;
 * Add your `username` and `password` to the script (optionally followed by the number of exercises to skip);
   * or add them as arguments, in the same order;
