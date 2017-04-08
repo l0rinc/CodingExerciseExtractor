@@ -130,7 +130,7 @@ object Crawler2 {
                 .execute()
     }
 
-    private fun className(info: LeetCodeProblem) = Regex("""public class (\w+)""").find(info.solution)!!.groupValues[1]
+    private fun className(info: LeetCodeProblem) = Regex("""public class (\w+)""").find(info.solution)?.groupValues?.get(1) ?: "Solution"
 
     private fun parseDuration(submission: JsonObject): LocalDateTime =
             Regex("""^(?:(\d+) years?)?(?: *(\d+) months?)?(?: *(\d+) weeks?)?(?: *(\d+) +days?)?(?: *(\d+) hours?)?(?: *(\d+) minutes?)?$""")
@@ -145,7 +145,7 @@ object Crawler2 {
                         .minusMinutes(minute.toLongOrNull() ?: 0)
             }
 
-    private fun parsePackage(submission: JsonObject): String = submission.string("title")!!.trim().toLowerCase().replace(Regex(""" +(.)""")) { x -> x.groupValues[1].toUpperCase() }
+    private fun parsePackage(submission: JsonObject): String = submission.string("title")!!.trim().replace(Regex("(?i)[^a-z]"), "").decapitalize()
     private fun getDescription(solution: Document): String = solution.select("""meta[name="description"]""").attr("content")
     private fun parseLink(solution: Document): String = base + solution.select("""a[href^="/problems/"]""").first().attr("href")
     private fun getSolution(solution: Document): String {
