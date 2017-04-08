@@ -149,5 +149,5 @@ object Crawler {
         return result
     }
 
-    fun echo(text: String): String = "echo -e $'${text.replace("""\""", """\\\\""").replace("'", """\'""").replace("\n", """\n""")}'"
+    fun echo(text: String): String = "echo -e $'${text.replace("""\""", """\\\\""").replace("\t", "    ").replace(" +\n", "\n").replace("'", """\'""").replace("\n", """\n""")}'"
 }
