@@ -2,6 +2,7 @@ group 'pap.lorinc'
 version '1.0-SNAPSHOT'
 
 repositories {
+    jcenter()
     mavenCentral()
     maven { url "http://dl.bintray.com/jetbrains/spek" }
 }
@@ -11,6 +12,7 @@ buildscript {
     ext.junit_platform_version = '1.0.0-M3'
     ext.jsoup_version = '1.10.2'
     ext.spek_version = '1.1.0'
+    ext.klaxon_version = '0.30'
 
     repositories { mavenCentral() }
     dependencies {
@@ -29,7 +31,8 @@ junitPlatform { filters { engines { include 'spek' } } }
 dependencies {
     compile([group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: kotlin_version],
             [group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlin_version],
-            [group: 'org.jsoup', name: 'jsoup', version: jsoup_version]
+            [group: 'org.jsoup', name: 'jsoup', version: jsoup_version],
+            [group: 'com.beust', name: 'klaxon', version: klaxon_version]
     )
 
     testCompile(
