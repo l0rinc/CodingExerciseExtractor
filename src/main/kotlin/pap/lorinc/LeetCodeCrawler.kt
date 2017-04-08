@@ -7,7 +7,7 @@ import org.jsoup.nodes.Document
 import pap.lorinc.Crawler.echo
 import java.time.Duration
 import java.time.LocalDateTime
-import kotlin.text.RegexOption.*
+import kotlin.text.RegexOption.MULTILINE
 
 enum class Language { CPP, JAVA, PYTHON, C, CSHARP, JAVASCRIPT, RUBY, SWIFT, GOLANG }
 data class LeetCodeProblem(val submitTime: LocalDateTime, val packageName: String, val link: String, val description: String, val solution: String, val name: String, val runTime: Duration, val language: Language)
@@ -15,8 +15,8 @@ data class LeetCodeProblem(val submitTime: LocalDateTime, val packageName: Strin
 object Crawler2 {
     val base = "https://leetcode.com"
 
-    var userId   = "" // your userId here
-    var password = "" // your password here
+    var userId = "paplorinc" // your userId here
+    var password = "3NhNjImKj<" // your password here
 
     @JvmStatic fun main(args: Array<String>) {
         val cookies = login().cookies()
@@ -28,7 +28,7 @@ object Crawler2 {
     private fun parseContent(cookies: MutableMap<String, String>): List<LeetCodeProblem> {
         val visited = hashSetOf<String>()
         val results = mutableListOf<LeetCodeProblem>()
-        for (page in 1..10000) {
+        for (page in 1..30) {
             val parsedSubmissions = submissions(page, cookies)
 
             val solutions = solutions(cookies, parsedSubmissions, visited)
@@ -69,6 +69,9 @@ object Crawler2 {
             >
             >
             >${echo(createTreeNode)} > $sourcesFolder/TreeNode.java
+            >${echo(createListNode)} > $sourcesFolder/ListNode.java
+            >${echo(createInterval)} > $sourcesFolder/Interval.java
+            >
             >${echo("to install gradle, type: sudo add-apt-repository ppa:cwchien/gradle && sudo apt-get update && sudo apt-get install gradle")}
             >${echo("[![Build Status](https://travis-ci.org/$userName/LeetCodeSolutions.png)](https://travis-ci.org/$userName/LeetCodeSolutions)\n\nSolutions to my [LeetCode](http://LeetCode.com) exercises, exported by [CodingExerciseExtractor](https://github.com/paplorinc/CodingExerciseExtractor).")} > README.md
             >${echo("language: $languages\n\njdk: oraclejdk8\n\nbefore_install: chmod +x gradlew\nscript: ./gradlew clean build --stacktrace")} > .travis.yml
@@ -87,6 +90,26 @@ object Crawler2 {
         >
         >    public TreeNode(int val) { this.val = val; }
         >}""".trimMargin(">")
+    val createListNode = """
+        >package leetcode;
+        >
+        >public class ListNode {
+        >    public int val;
+        >    public ListNode next;
+        >    public ListNode(int val) { this.val = val; }
+        >}""".trimMargin(">")
+    val createInterval = """
+        >package leetcode;
+        >
+        >public class Interval {
+        >    public int start, end;
+        >
+        >    public Interval() {}
+        >    public Interval(int start, int end) {
+        >        this.start = start;
+        >        this.end = end;
+        >    }
+        >}""".trimMargin(">")
 
 
     private fun generateMain(info: LeetCodeProblem) =
@@ -100,6 +123,7 @@ object Crawler2 {
         >
         >/**
         > * ${info.description.lines().map(String::trim).joinToString("\n * ")}
+        >
         > * Source: ${info.link}
         > */
         >${info.solution}
