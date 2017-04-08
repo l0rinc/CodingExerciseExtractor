@@ -7,6 +7,7 @@ import org.jsoup.nodes.Document
 import pap.lorinc.Crawler.echo
 import java.time.Duration
 import java.time.LocalDateTime
+import kotlin.text.RegexOption.*
 
 enum class Language { CPP, JAVA, PYTHON, C, CSHARP, JAVASCRIPT, RUBY, SWIFT, GOLANG }
 data class LeetCodeProblem(val submitTime: LocalDateTime, val packageName: String, val link: String, val description: String, val solution: String, val name: String, val runTime: Duration, val language: Language)
@@ -42,6 +43,7 @@ object Crawler2 {
     }
 
     private fun generateCommands(contents: List<LeetCodeProblem>) = {
+        val sourcesFolder = "src/main/java/leetcode/"
         val before = """
             >
             >git init
@@ -49,7 +51,7 @@ object Crawler2 {
             """.trimMargin(">")
 
         val git = contents.map { info ->
-            val mainJava = "src/main/java/leetcode/${info.packageName}"
+            val mainJava = sourcesFolder + info.packageName
             val className = className(info)
             """
             >
@@ -66,6 +68,7 @@ object Crawler2 {
         val after = """
             >
             >
+            >${echo(createTreeNode)} > $sourcesFolder/TreeNode.java
             >${echo("to install gradle, type: sudo add-apt-repository ppa:cwchien/gradle && sudo apt-get update && sudo apt-get install gradle")}
             >${echo("[![Build Status](https://travis-ci.org/$userName/LeetCodeSolutions.png)](https://travis-ci.org/$userName/LeetCodeSolutions)\n\nSolutions to my [LeetCode](http://LeetCode.com) exercises, exported by [CodingExerciseExtractor](https://github.com/paplorinc/CodingExerciseExtractor).")} > README.md
             >${echo("language: $languages\n\njdk: oraclejdk8\n\nbefore_install: chmod +x gradlew\nscript: ./gradlew clean build --stacktrace")} > .travis.yml
@@ -75,11 +78,25 @@ object Crawler2 {
         before + git + after
     }
 
+    val createTreeNode = """
+        >package leetcode;
+        >
+        >public class TreeNode {
+        >    public int val;
+        >    public TreeNode left, right;
+        >
+        >    public TreeNode(int val) { this.val = val; }
+        >}""".trimMargin(">")
+
+
     private fun generateMain(info: LeetCodeProblem) =
             """
         >package leetcode.${info.packageName};
         >
         >import java.util.*;
+        >import java.util.stream.*;
+        >import java.util.function.*;
+        >import leetcode.*;
         >
         >/**
         > * ${info.description.lines().map(String::trim).joinToString("\n * ")}
@@ -130,7 +147,7 @@ object Crawler2 {
                 .execute()
     }
 
-    private fun className(info: LeetCodeProblem) = Regex("""public class (\w+)""").find(info.solution)?.groupValues?.get(1) ?: "Solution"
+    private fun className(info: LeetCodeProblem) = Regex("""^public class (\w+)""", MULTILINE).find(info.solution)?.groupValues?.get(1) ?: "Solution"
 
     private fun parseDuration(submission: JsonObject): LocalDateTime =
             Regex("""^(?:(\d+) years?)?(?: *(\d+) months?)?(?: *(\d+) weeks?)?(?: *(\d+) +days?)?(?: *(\d+) hours?)?(?: *(\d+) minutes?)?$""")
