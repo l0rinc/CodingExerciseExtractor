@@ -15,8 +15,8 @@ data class LeetCodeProblem(val submitTime: LocalDateTime, val packageName: Strin
 object Crawler2 {
     val base = "https://leetcode.com"
 
-    var userId = "paplorinc" // your userId here
-    var password = "3NhNjImKj<" // your password here
+    var userId   = "" // your userId here
+    var password = "" // your password here
 
     @JvmStatic fun main(args: Array<String>) {
         val cookies = login().cookies()
@@ -28,7 +28,7 @@ object Crawler2 {
     private fun parseContent(cookies: MutableMap<String, String>): List<LeetCodeProblem> {
         val visited = hashSetOf<String>()
         val results = mutableListOf<LeetCodeProblem>()
-        for (page in 1..30) {
+        for (page in 1..1000) {
             val parsedSubmissions = submissions(page, cookies)
 
             val solutions = solutions(cookies, parsedSubmissions, visited)
@@ -71,6 +71,7 @@ object Crawler2 {
             >${echo(createTreeNode)} > $sourcesFolder/TreeNode.java
             >${echo(createListNode)} > $sourcesFolder/ListNode.java
             >${echo(createInterval)} > $sourcesFolder/Interval.java
+            >${echo(createGuessGame)} > $sourcesFolder/GuessGame.java
             >
             >${echo("to install gradle, type: sudo add-apt-repository ppa:cwchien/gradle && sudo apt-get update && sudo apt-get install gradle")}
             >${echo("[![Build Status](https://travis-ci.org/$userName/LeetCodeSolutions.png)](https://travis-ci.org/$userName/LeetCodeSolutions)\n\nSolutions to my [LeetCode](http://LeetCode.com) exercises, exported by [CodingExerciseExtractor](https://github.com/paplorinc/CodingExerciseExtractor).")} > README.md
@@ -109,6 +110,21 @@ object Crawler2 {
         >        this.start = start;
         >        this.end = end;
         >    }
+        >}""".trimMargin(">")
+    val createGuessGame = """
+        >package leetcode;
+        >
+        >import java.util.concurrent.ThreadLocalRandom;
+        >
+        >/**
+        > * -1 : My number is lower
+        > *  1 : My number is higher
+        > *  0 : Congrats! You got it!
+        > **/
+        >public class GuessGame {
+        >    private Integer guess = ThreadLocalRandom.current().nextInt();
+        >
+        >    public int guess(int num) { return guess.compareTo(num); }
         >}""".trimMargin(">")
 
 
@@ -187,7 +203,7 @@ object Crawler2 {
             }
 
     private fun parsePackage(submission: JsonObject): String = submission.string("title")!!.trim().replace(Regex("(?i)[^a-z]"), "").decapitalize()
-    private fun getDescription(solution: Document): String = solution.select("""meta[name="description"]""").attr("content")
+    private fun getDescription(solution: Document): String = solution.select("""meta[name="description"]""").attr("content").replace(Regex("\n{2,}"), "\n\n")
     private fun parseLink(solution: Document): String = base + solution.select("""a[href^="/problems/"]""").first().attr("href")
     private fun getSolution(solution: Document): String {
         val code = Regex("submissionCode: '(.+)',").find(solution.select("script")[7].html())!!.groupValues[1]
