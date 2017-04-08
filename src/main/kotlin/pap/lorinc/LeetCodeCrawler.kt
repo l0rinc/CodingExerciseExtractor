@@ -72,6 +72,7 @@ object Crawler2 {
             >${echo(createListNode)} > $sourcesFolder/ListNode.java
             >${echo(createInterval)} > $sourcesFolder/Interval.java
             >${echo(createGuessGame)} > $sourcesFolder/GuessGame.java
+            >${echo(createVersionControl)} > $sourcesFolder/VersionControl.java
             >
             >${echo("to install gradle, type: sudo add-apt-repository ppa:cwchien/gradle && sudo apt-get update && sudo apt-get install gradle")}
             >${echo("[![Build Status](https://travis-ci.org/$userName/LeetCodeSolutions.png)](https://travis-ci.org/$userName/LeetCodeSolutions)\n\nSolutions to my [LeetCode](http://LeetCode.com) exercises, exported by [CodingExerciseExtractor](https://github.com/paplorinc/CodingExerciseExtractor).")} > README.md
@@ -125,6 +126,12 @@ object Crawler2 {
         >    private Integer guess = ThreadLocalRandom.current().nextInt();
         >
         >    public int guess(int num) { return guess.compareTo(num); }
+        >}""".trimMargin(">")
+    val createVersionControl = """
+        >package leetcode;
+        >
+        >public class VersionControl {
+        >    public boolean isBadVersion(int version) { throw new IllegalStateException(); }
         >}""".trimMargin(">")
 
 
