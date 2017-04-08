@@ -18,23 +18,25 @@ object Crawler2 {
     var password = "" // your password here
 
     @JvmStatic fun main(args: Array<String>) {
-        val document = login()
-        val contents = parseContent(document)
+        val cookies = login().cookies()
+        val contents = parseContent(cookies)
         val commands = generateCommands(contents)
         println(commands())
     }
 
-    private fun parseContent(document: Connection.Response): List<LeetCodeProblem> {
+    private fun parseContent(cookies: MutableMap<String, String>): List<LeetCodeProblem> {
         val visited = hashSetOf<String>()
         val results = mutableListOf<LeetCodeProblem>()
         for (page in 1..10000) {
-            val parsedSubmissions = submissions(page, document.cookies())
+            val parsedSubmissions = submissions(page, cookies)
 
-            val solutions = solutions(document, parsedSubmissions, visited)
+            val solutions = solutions(cookies, parsedSubmissions, visited)
             results.addAll(solutions)
 
             if (parsedSubmissions.boolean("has_next") != true)
                 break
+
+            println("Page $page complete with: ${solutions.map { "'${it.name}'" }.joinToString(",")}")
         }
         return results.reversed()
     }
@@ -87,12 +89,12 @@ object Crawler2 {
         >""".trimMargin(">").trim()
 
 
-    private fun solutions(document: Connection.Response, parsedSubmissions: JsonObject, visited: HashSet<String>): List<LeetCodeProblem> =
+    private fun solutions(cookies: MutableMap<String, String>, parsedSubmissions: JsonObject, visited: HashSet<String>): List<LeetCodeProblem> =
             parsedSubmissions.array<JsonObject>("submissions_dump")!!
                     .filter { s -> s.string("status_display") == "Accepted" }
                     .filter { s -> visited.add(s.string("title")!!) }
                     .map { submission ->
-                        val solution = Jsoup.connect(base + submission.string("url")).cookies(document.cookies()).get()
+                        val solution = Jsoup.connect(base + submission.string("url")).cookies(cookies).get()
                         LeetCodeProblem(
                                 submitTime = parseDuration(submission),
                                 packageName = parsePackage(submission),
@@ -113,14 +115,14 @@ object Crawler2 {
 
     private fun login(): Connection.Response {
         val loginForm = Jsoup
-                .connect("$base/accounts/login")
+                .connect("$base/accounts/login/")
                 .execute()
 
         val token = loginForm.parse().select("""input[name="csrfmiddlewaretoken"]""").attr("value")
         return Jsoup
-                .connect("$base/accounts/login")
+                .connect("$base/accounts/login/")
                 .method(Connection.Method.POST)
-                .referrer("$base/accounts/login")
+                .referrer("$base/accounts/login/")
                 .data("csrfmiddlewaretoken", token)
                 .data("login", userId)
                 .data("password", password)
