@@ -9,8 +9,8 @@ It will also add a basic `gradle` build and run it after the script is run.
 
 ### Example:
 See my own exported solutions at:
-* [CodingBatSolutions](https://github.com/paplorinc/CodingBatSolutions) 
-* [LeetCodeSolutions](https://github.com/paplorinc/LeetCodeSolutions) 
+* [CodingBatSolutions](https://github.com/paplorinc/CodingBatSolutions/tree/master/src) 
+* [LeetCodeSolutions](https://github.com/paplorinc/LeetCodeSolutions/tree/master/src/main/java/leetcode) 
 
 ### Steps:
 * Import the provided `Kotlin` & `Jsoup` script in `Idea`;
