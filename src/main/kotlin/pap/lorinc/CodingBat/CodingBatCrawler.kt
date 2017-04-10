@@ -1,7 +1,8 @@
-package pap.lorinc
+package pap.lorinc.CodingBat
 
 import org.jsoup.Connection
 import org.jsoup.Jsoup
+import pap.lorinc.Utils.echo
 
 data class Test(val methodCall: String, val expected: String)
 data class CodingBatProblem(val packageName: String, val className: String, val methodName: String, val link: String, val date: String, val description: String, val content: String, val tests: List<Test>)
@@ -148,6 +149,4 @@ object Crawler {
         else if (declaration.contains("String[]")) result = result.replace("]", "] as String[]")
         return result
     }
-
-    fun echo(text: String): String = "echo -e $'${text.replace("""\""", """\\\\""").replace("\t", "    ").replace(" +\n", "\n").replace("'", """\'""").replace("\n", """\n""")}'"
 }

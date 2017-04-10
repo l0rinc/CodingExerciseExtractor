@@ -1,10 +1,10 @@
-package pap.lorinc
+package pap.lorinc.LeetCode
 
 import com.beust.klaxon.*
 import org.jsoup.Connection
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import pap.lorinc.Crawler.echo
+import pap.lorinc.Utils.echo
 import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.text.RegexOption.MULTILINE
