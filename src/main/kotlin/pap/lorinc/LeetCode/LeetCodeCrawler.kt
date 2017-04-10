@@ -17,6 +17,7 @@ object Crawler2 {
 
     var userId   = "" // your userId here
     var password = "" // your password here
+    var maxPageCount = 1000
 
     @JvmStatic fun main(args: Array<String>) {
         val cookies = login().cookies()
@@ -28,7 +29,7 @@ object Crawler2 {
     private fun parseContent(cookies: MutableMap<String, String>): List<LeetCodeProblem> {
         val visited = hashSetOf<String>()
         val results = mutableListOf<LeetCodeProblem>()
-        for (page in 1..1000) {
+        for (page in 1..maxPageCount) {
             val parsedSubmissions = submissions(page, cookies)
 
             val solutions = solutions(cookies, parsedSubmissions, visited)
@@ -43,7 +44,11 @@ object Crawler2 {
     }
 
     private fun generateCommands(contents: List<LeetCodeProblem>) = {
-        val sourcesFolder = "src/main/java/leetcode/"
+        val userName = userId.replace(Regex("@.+$"), "")
+        val languages = contents.map { it.language.toString().toLowerCase() }.toSet().joinToString(",")
+        if ("java" != languages) throw IllegalStateException("Only Java is supported for now!")
+        val sourcesFolder = "src/main/${languages.first()}/leetcode/"
+
         val before = """
             >
             >git init
@@ -63,8 +68,6 @@ object Crawler2 {
             """.trimMargin(">")
         }.joinToString("\n")
 
-        val userName = userId.replace(Regex("@.+$"), "")
-        val languages = contents.map { it.language.toString().toLowerCase() }.toSet().joinToString(",")
         val after = """
             >
             >
@@ -80,6 +83,7 @@ object Crawler2 {
             >gradle init --type java-library --test-framework spock && rm src/test/groovy/LibraryTest.groovy && rm src/main/java/Library.java && git add -A && gradle build
             >
             """.trimMargin(">")
+
         before + git + after
     }
 
@@ -172,9 +176,12 @@ object Crawler2 {
                     }
 
     private fun submissions(page: Int, cookies: MutableMap<String, String>): JsonObject {
-        val submissions = Jsoup.connect("$base/api/submissions/my/$page/?format=json").cookies(cookies).ignoreContentType(true).get().body().text()
-        val parsedSubmissions = Parser().parse(StringBuilder(submissions)) as JsonObject
-        return parsedSubmissions
+        val submissions = Jsoup
+                .connect("$base/api/submissions/my/$page/?format=json")
+                .cookies(cookies)
+                .ignoreContentType(true)
+                .get().body().text()
+        return Parser().parse(StringBuilder(submissions)) as JsonObject
     }
 
     private fun login(): Connection.Response {
@@ -196,18 +203,19 @@ object Crawler2 {
 
     private fun className(info: LeetCodeProblem) = Regex("""^public class (\w+)""", MULTILINE).find(info.solution)?.groupValues?.get(1) ?: "Solution"
 
-    private fun parseDuration(submission: JsonObject): LocalDateTime =
-            Regex("""^(?:(\d+) years?)?(?: *(\d+) months?)?(?: *(\d+) weeks?)?(?: *(\d+) +days?)?(?: *(\d+) hours?)?(?: *(\d+) minutes?)?$""")
-                    .matchEntire(submission.string("time")!!.replace(Regex("""\W+"""), " ")).let {
-                val (year, month, week, day, hour, minute) = it!!.destructured
-                LocalDateTime.now()
-                        .minusYears(year.toLongOrNull() ?: 0)
-                        .minusMonths(month.toLongOrNull() ?: 0)
-                        .minusWeeks(week.toLongOrNull() ?: 0)
-                        .minusDays(day.toLongOrNull() ?: 0)
-                        .minusHours(hour.toLongOrNull() ?: 0)
-                        .minusMinutes(minute.toLongOrNull() ?: 0)
-            }
+    private fun parseDuration(submission: JsonObject): LocalDateTime {
+        val submissionTime = submission.string("time")!!.replace(Regex("""\W+"""), " ")
+        return Regex("""^(?:(\d+) years?)?(?: *(\d+) months?)?(?: *(\d+) weeks?)?(?: *(\d+) +days?)?(?: *(\d+) hours?)?(?: *(\d+) minutes?)?$""")
+                .matchEntire(submissionTime)!!.destructured.let { (year, month, week, day, hour, minute) ->
+            LocalDateTime.now()
+                    .minusYears(year.toLongOrNull() ?: 0)
+                    .minusMonths(month.toLongOrNull() ?: 0)
+                    .minusWeeks(week.toLongOrNull() ?: 0)
+                    .minusDays(day.toLongOrNull() ?: 0)
+                    .minusHours(hour.toLongOrNull() ?: 0)
+                    .minusMinutes(minute.toLongOrNull() ?: 0)
+        }
+    }
 
     private fun parsePackage(submission: JsonObject): String = submission.string("title")!!.trim().replace(Regex("(?i)[^a-z]"), "").decapitalize()
     private fun getDescription(solution: Document): String = solution.select("""meta[name="description"]""").attr("content").replace(Regex("\n{2,}"), "\n\n")
