@@ -4,10 +4,8 @@ import com.beust.klaxon.*
 import org.jsoup.Connection
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import pap.lorinc.Utils.echo
 import java.time.Duration
 import java.time.LocalDateTime
-import kotlin.text.RegexOption.MULTILINE
 
 enum class Language { CPP, JAVA, PYTHON, C, CSHARP, JAVASCRIPT, RUBY, SWIFT, GOLANG }
 data class LeetCodeProblem(val submitTime: LocalDateTime, val packageName: String, val link: String, val description: String, val solution: String, val name: String, val runTime: Duration, val language: Language)
@@ -38,63 +36,6 @@ object Crawler2 {
         }
         return results.reversed()
     }
-
-    private fun generateCommands(contents: List<LeetCodeProblem>) = {
-        val userName = userId.replace(Regex("@.+$"), "")
-        val languages = contents.map { it.language.toString().toLowerCase() }.toSet().joinToString(",")
-        if ("java" != languages) throw IllegalStateException("Only Java is supported for now!")
-        val sourcesFolder = "src/main/${languages.first()}/leetcode/"
-
-        val before = """
-            >
-            >git init
-            >
-            """.trimMargin(">")
-
-        val git = contents.map { info ->
-            val mainJava = sourcesFolder + info.packageName
-            val className = className(info)
-            """
-            >
-            >mkdir -p '$mainJava'
-            >${echo(generateMain(info))} > $mainJava/$className.java
-            >git add src
-            >git commit -m "${info.name}" --date="${info.submitTime}"
-            >
-            """.trimMargin(">")
-        }.joinToString("\n")
-
-        val after = """
-            >
-            >
-            >${library.map { "\n>echo(${it.value}) > $sourcesFolder/${it.key}.java" }}
-            >
-            >${echo("to install gradle, type: sudo add-apt-repository ppa:cwchien/gradle && sudo apt-get update && sudo apt-get install gradle")}
-            >${echo("[![Build Status](https://travis-ci.org/$userName/LeetCodeSolutions.png)](https://travis-ci.org/$userName/LeetCodeSolutions)\n\nSolutions to my [LeetCode](http://LeetCode.com) exercises, exported by [CodingExerciseExtractor](https://github.com/paplorinc/CodingExerciseExtractor).")} > README.md
-            >${echo("language: $languages\n\njdk: oraclejdk8\n\nbefore_install: chmod +x gradlew\nscript: ./gradlew clean build --stacktrace")} > .travis.yml
-            >gradle init --type java-library --test-framework spock && rm src/test/groovy/LibraryTest.groovy && rm src/main/java/Library.java && git add -A && gradle build
-            >
-            """.trimMargin(">")
-
-        before + git + after
-    }
-
-    private fun generateMain(info: LeetCodeProblem) = """
-        >package leetcode.${info.packageName};
-        >
-        >import java.util.*;
-        >import java.util.stream.*;
-        >import java.util.function.*;
-        >import leetcode.*;
-        >
-        >/**
-        > * ${info.description.prependIndent(" * ")}
-        > *
-        > * Source: ${info.link}
-        > */
-        >${info.solution}
-        >""".trimMargin(">").trim()
-
 
     private fun solutions(cookies: MutableMap<String, String>, parsedSubmissions: JsonObject, visited: HashSet<String>): List<LeetCodeProblem> =
             parsedSubmissions.array<JsonObject>("submissions_dump")!!
@@ -139,8 +80,6 @@ object Crawler2 {
                 .cookies(loginForm.cookies())
                 .execute()
     }
-
-    private fun className(info: LeetCodeProblem) = Regex("""^public class (\w+)""", MULTILINE).find(info.solution)?.groupValues?.get(1) ?: "Solution"
 
     private fun parseDuration(submission: JsonObject): LocalDateTime {
         val submissionTime = submission.string("time")!!.replace(Regex("""\W+"""), " ")
