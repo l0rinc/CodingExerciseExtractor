@@ -15,10 +15,6 @@ data class LeetCodeProblem(val submitTime: LocalDateTime, val packageName: Strin
 object Crawler2 {
     val base = "https://leetcode.com"
 
-    var userId   = "" // your userId here
-    var password = "" // your password here
-    var maxPageCount = 1000
-
     @JvmStatic fun main(args: Array<String>) {
         val cookies = login().cookies()
         val contents = parseContent(cookies)
@@ -139,8 +135,7 @@ object Crawler2 {
         >}""".trimMargin(">")
 
 
-    private fun generateMain(info: LeetCodeProblem) =
-            """
+    private fun generateMain(info: LeetCodeProblem) = """
         >package leetcode.${info.packageName};
         >
         >import java.util.*;
@@ -224,7 +219,6 @@ object Crawler2 {
         val code = Regex("submissionCode: '(.+)',").find(solution.select("script")[7].html())!!.groupValues[1]
         return code.replace(Regex("""\\u(....)""")) { m -> m.groupValues[1].toLong(16).toChar().toString() }
     }
-
     private fun getName(submission: JsonObject): String = submission.string("title")!!
     private fun getRunTime(submission: JsonObject): Duration = Duration.ofMillis(submission.string("runtime")!!.replace(Regex("""\D+"""), "").toLong())
     private fun parseLanguage(submission: JsonObject): Language = Language.valueOf(submission.string("lang")!!.toUpperCase())

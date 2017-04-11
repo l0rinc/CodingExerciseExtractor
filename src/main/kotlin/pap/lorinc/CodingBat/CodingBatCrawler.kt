@@ -10,62 +10,48 @@ data class CodingBatProblem(val packageName: String, val className: String, val 
 object Crawler {
     val base = "http://codingbat.com"
 
-    var userId   = "" // your userId here
-    var password = "" // your password here
-    var skip     = 0  // your finished and committed exercise count
-
     @JvmStatic fun main(args: Array<String>) {
-        init(args)
-        val contents = parseContent()
-        val commands = generateCommands(contents())
+        val cookies = login().cookies()
+        val contents = parseContent(cookies)
+        val commands = generateCommands(contents)
         println(commands())
     }
 
-    private fun init(args: Array<String>) {
-        userId = args.getOrElse(0) { userId }
-        password = args.getOrElse(1) { password }
-        skip = args.getOrElse(2) { skip.toString() }.toInt()
-        assert(userId.isNotEmpty() && password.isNotEmpty() && skip >= 0) { "You need to provide some authentication info!" }
-    }
+    private fun parseContent(cookies: Map<String, String>): List<CodingBatProblem> =
+            Jsoup.connect("$base/done").cookies(cookies).get()
+                    .select("a[href^=/prob/]").drop(skip)
+                    .map { prob ->
+                        val probLink = base + prob.attr("href")
+                        val probDoc = Jsoup.connect(probLink).cookies(cookies).get()
 
-    private fun parseContent() = {
-        val cookies = login()
-        Jsoup.connect("$base/done").cookies(cookies).get()
-             .select("a[href^=/prob/]").drop(skip)
-             .map { prob ->
-                 val probLink = base + prob.attr("href")
-                 val probDoc = Jsoup.connect(probLink).cookies(cookies).get()
+                        val packageName = probDoc.select("body > div.tabc > div > div > a:nth-child(1) > span").first().text().replace(Regex("""\W+"""), "_").toLowerCase()
+                        val methodName = probDoc.select("body > div.tabc > div > div > span").first().text()
+                        val className = methodName.capitalize()
+                        val date = prob.nextSibling().nextSibling().childNode(0).toString()
+                        val description = probDoc.select("div.minh").first().text().trim()
+                        val content = probDoc.select("#ace_div").first().textNodes().first().wholeText.trim()
 
-                 val packageName = probDoc.select("body > div.tabc > div > div > a:nth-child(1) > span").first().text().replace(Regex("""\W+"""), "_").toLowerCase()
-                 val methodName = probDoc.select("body > div.tabc > div > div > span").first().text()
-                 val className = methodName.capitalize()
-                 val date = prob.nextSibling().nextSibling().childNode(0).toString()
-                 val description = probDoc.select("div.minh").first().text().trim()
-                 val content = probDoc.select("#ace_div").first().textNodes().first().wholeText.trim()
+                        val id = probDoc.select("input[name=id]").first().attr("value")
+                        val tests = getTests(content, id)
 
-                 val id = probDoc.select("input[name=id]").first().attr("value")
-                 val tests = getTests(content, id)
+                        CodingBatProblem(packageName, className, methodName, probLink, date, description, content, tests)
+                    }
 
-                 CodingBatProblem(packageName, className, methodName, probLink, date, description, content, tests)
-             }
-    }
-
-    private fun login(): Map<String, String> {
-        return Jsoup.connect("$base/login")
-                    .method(Connection.Method.POST)
-                    .data("uname", userId)
-                    .data("pw", password)
-                    .data("dologin", "log in")
-                    .data("fromurl", "/java")
-                    .execute()
-                    .cookies()
-    }
+    private fun login(): Connection.Response = Jsoup
+            .connect("$base/login")
+            .method(Connection.Method.POST)
+            .data("uname", userId)
+            .data("pw", password)
+            .data("dologin", "log in")
+            .data("fromurl", "/java")
+            .execute()
 
     private fun getTests(content: String, id: String): List<Test> {
-        val testsDoc = Jsoup.connect("$base/run")
-                            .data("id", id)
-                            .data("code", content)
-                            .post()
+        val testsDoc = Jsoup
+                .connect("$base/run")
+                .data("id", id)
+                .data("code", content)
+                .post()
         val delimiter = " → "
         val tests = testsDoc.select("#tests > table > tbody > tr > td:nth-child(1)").map { it.text() }.filter { it.contains(delimiter) }.map {
             val (methodCall, expected) = it.split(delimiter)
@@ -75,6 +61,8 @@ object Crawler {
     }
 
     private fun generateCommands(contents: List<CodingBatProblem>) = {
+        val userName = userId.replace(Regex("@.+$"), "")
+
         val before = """
             >
             >git init
@@ -95,7 +83,6 @@ object Crawler {
             """.trimMargin(">")
         }.joinToString("\n")
 
-        val userName = userId.replace(Regex("@.+$"), "")
         val after = """
             >
             >
@@ -105,12 +92,12 @@ object Crawler {
             >gradle init --type java-library --test-framework spock && rm src/test/groovy/LibraryTest.groovy && rm src/main/java/Library.java && git add -A && gradle build
             >
             """.trimMargin(">")
+
         if (skip > 0) git + "gradle build"
         else before + git + after
     }
 
-    private fun generateMain(info: CodingBatProblem) =
-        """
+    private fun generateMain(info: CodingBatProblem) = """
         >package ${info.packageName};
         >
         >import java.util.*;
@@ -124,8 +111,7 @@ object Crawler {
         >}
         >""".trimMargin(">").trim()
 
-    private fun generateTest(info: CodingBatProblem, testClassName: String) =
-        """
+    private fun generateTest(info: CodingBatProblem, testClassName: String) = """
         >package ${info.packageName};
         >
         >import spock.lang.Specification
@@ -141,7 +127,7 @@ object Crawler {
         >}
         >""".trimMargin(">").trim()
 
-    private fun fix(test: Test) = test.expected.replace("Th a FH", "Th  a FH")
+    private fun fix(test: Test): String = test.expected.replace("Th a FH", "Th  a FH")
     private fun fix(info: CodingBatProblem, test: Test): String {
         var result = test.methodCall.replace('"', '\'').replace('{', '[').replace('}', ']')
         val declaration = info.content.lines().first()
