@@ -67,11 +67,7 @@ object Crawler2 {
         val after = """
             >
             >
-            >${echo(createTreeNode)} > $sourcesFolder/TreeNode.java
-            >${echo(createListNode)} > $sourcesFolder/ListNode.java
-            >${echo(createInterval)} > $sourcesFolder/Interval.java
-            >${echo(createGuessGame)} > $sourcesFolder/GuessGame.java
-            >${echo(createVersionControl)} > $sourcesFolder/VersionControl.java
+            >${library.map { "\n>echo(${it.value}) > $sourcesFolder/${it.key}.java" }}
             >
             >${echo("to install gradle, type: sudo add-apt-repository ppa:cwchien/gradle && sudo apt-get update && sudo apt-get install gradle")}
             >${echo("[![Build Status](https://travis-ci.org/$userName/LeetCodeSolutions.png)](https://travis-ci.org/$userName/LeetCodeSolutions)\n\nSolutions to my [LeetCode](http://LeetCode.com) exercises, exported by [CodingExerciseExtractor](https://github.com/paplorinc/CodingExerciseExtractor).")} > README.md
@@ -82,58 +78,6 @@ object Crawler2 {
 
         before + git + after
     }
-
-    val createTreeNode = """
-        >package leetcode;
-        >
-        >public class TreeNode {
-        >    public int val;
-        >    public TreeNode left, right;
-        >
-        >    public TreeNode(int val) { this.val = val; }
-        >}""".trimMargin(">")
-    val createListNode = """
-        >package leetcode;
-        >
-        >public class ListNode {
-        >    public int val;
-        >    public ListNode next;
-        >    public ListNode(int val) { this.val = val; }
-        >}""".trimMargin(">")
-    val createInterval = """
-        >package leetcode;
-        >
-        >public class Interval {
-        >    public int start, end;
-        >
-        >    public Interval() {}
-        >    public Interval(int start, int end) {
-        >        this.start = start;
-        >        this.end = end;
-        >    }
-        >}""".trimMargin(">")
-    val createGuessGame = """
-        >package leetcode;
-        >
-        >import java.util.concurrent.ThreadLocalRandom;
-        >
-        >/**
-        > * -1 : My number is lower
-        > *  1 : My number is higher
-        > *  0 : Congrats! You got it!
-        > **/
-        >public class GuessGame {
-        >    private Integer guess = ThreadLocalRandom.current().nextInt();
-        >
-        >    public int guess(int num) { return guess.compareTo(num); }
-        >}""".trimMargin(">")
-    val createVersionControl = """
-        >package leetcode;
-        >
-        >public class VersionControl {
-        >    public boolean isBadVersion(int version) { throw new IllegalStateException(); }
-        >}""".trimMargin(">")
-
 
     private fun generateMain(info: LeetCodeProblem) = """
         >package leetcode.${info.packageName};
