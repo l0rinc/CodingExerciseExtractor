@@ -2,12 +2,9 @@ package pap.lorinc
 
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
+import pap.lorinc.LeetCode.LeetCodeCrawler.parseDuration
 import java.time.LocalDateTime
 import kotlin.test.expect
-
-fun parseDuration(duration: String, now: LocalDateTime): LocalDateTime {
-    return LocalDateTime.now() // TODO
-}
 
 class ParseDurationTests : Spek({
     data class Data(val input: String, val expected: LocalDateTime)
@@ -22,8 +19,8 @@ class ParseDurationTests : Spek({
                 Data("1 day ago", now.minusDays(1)),
                 Data("2 days, 12 hours ago", now.minusDays(2).minusHours(12)),
                 Data("1 week ago", now.minusWeeks(1)),
-                Data("1 week, 1 day ago", now.minusWeeks(7).minusDays(1)),
-                Data("3 weeks, 5 days ago", now.minusWeeks(7).minusDays(3)),
+                Data("1 week, 1 day ago", now.minusWeeks(1).minusDays(1)),
+                Data("3 weeks, 5 days ago", now.minusWeeks(1).minusDays(3)),
                 Data("1 month ago", now.minusMonths(1)),
                 Data("2 months ago", now.minusMonths(2)),
                 Data("2 months, 1 week ago", now.minusMonths(2).minusWeeks(1)),

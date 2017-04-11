@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 enum class Language { CPP, JAVA, PYTHON, C, CSHARP, JAVASCRIPT, RUBY, SWIFT, GOLANG }
 data class LeetCodeProblem(val submitTime: LocalDateTime, val packageName: String, val link: String, val description: String, val solution: String, val name: String, val runTime: Duration, val language: Language)
 
-object Crawler2 {
+object LeetCodeCrawler {
     val base = "https://leetcode.com"
 
     @JvmStatic fun main(args: Array<String>) {
@@ -43,8 +43,9 @@ object Crawler2 {
                     .filter { s -> visited.add(s.string("title")!!) }
                     .map { submission ->
                         val solution = Jsoup.connect(base + submission.string("url")).cookies(cookies).get()
+                        val input = submission.string("time")!!
                         LeetCodeProblem(
-                                submitTime = parseDuration(submission),
+                                submitTime = parseDuration(input, LocalDateTime.now()),
                                 packageName = parsePackage(submission),
                                 link = parseLink(solution),
                                 description = getDescription(solution),
@@ -81,19 +82,16 @@ object Crawler2 {
                 .execute()
     }
 
-    private fun parseDuration(submission: JsonObject): LocalDateTime {
-        val submissionTime = submission.string("time")!!.replace(Regex("""\W+"""), " ")
-        return Regex("""^(?:(\d+) years?)?(?: *(\d+) months?)?(?: *(\d+) weeks?)?(?: *(\d+) +days?)?(?: *(\d+) hours?)?(?: *(\d+) minutes?)?$""")
-                .matchEntire(submissionTime)!!.destructured.let { (year, month, week, day, hour, minute) ->
-            LocalDateTime.now()
-                    .minusYears(year.toLongOrNull() ?: 0)
-                    .minusMonths(month.toLongOrNull() ?: 0)
-                    .minusWeeks(week.toLongOrNull() ?: 0)
-                    .minusDays(day.toLongOrNull() ?: 0)
-                    .minusHours(hour.toLongOrNull() ?: 0)
-                    .minusMinutes(minute.toLongOrNull() ?: 0)
-        }
-    }
+    fun parseDuration(input: String, now: LocalDateTime): LocalDateTime =
+            Regex("""^(?:(\d+) years?)?(?: *(\d+) months?)?(?: *(\d+) weeks?)?(?: *(\d+) +days?)?(?: *(\d+) hours?)?(?: *(\d+) minutes?)?$""")
+                    .matchEntire(input.replace(Regex("""\W+"""), " "))!!.destructured.let { (year, month, week, day, hour, minute) ->
+                now.minusYears(year.toLongOrNull() ?: 0)
+                   .minusMonths(month.toLongOrNull() ?: 0)
+                   .minusWeeks(week.toLongOrNull() ?: 0)
+                   .minusDays(day.toLongOrNull() ?: 0)
+                   .minusHours(hour.toLongOrNull() ?: 0)
+                   .minusMinutes(minute.toLongOrNull() ?: 0)
+            }
 
     private fun parsePackage(submission: JsonObject): String = submission.string("title")!!.trim().replace(Regex("(?i)[^a-z]"), "").decapitalize()
     private fun getDescription(solution: Document): String = solution.select("""meta[name="description"]""").attr("content").replace(Regex("[\r\n]{2,}"), "\n\n")
