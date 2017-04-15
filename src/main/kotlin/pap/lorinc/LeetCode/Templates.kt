@@ -58,7 +58,7 @@ fun generateMain(info: LeetCodeProblem) = """
         >import leetcode.*;
         >
         >/**
-        > * ${info.description.prependIndent(" * ")}
+        > ${info.description.trim().prependIndent(" * ")}
         > *
         > * Source: ${info.link}
         > */
