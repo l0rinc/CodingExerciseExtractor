@@ -26,8 +26,8 @@ object LeetCodeCrawler {
     private fun parseContent(cookies: MutableMap<String, String>): List<LeetCodeProblem> {
         val parsedSubmissions = submissions(cookies)
         val results = solutions(cookies, parsedSubmissions)
-        println("$maxSubmissionCount submissions crawled, found: ${results.map { "'${it.name}'" }.joinToString(",")}")
-        return results.reversed()
+        println("Found: ${results.size}/$maxSubmissionCount submissions: ${results.map { "'${it.name}'" }.joinToString(",")}")
+        return results.sortedBy({ (submitTime) -> submitTime })
     }
 
     private fun solutions(cookies: MutableMap<String, String>, parsedSubmissions: JsonObject): List<LeetCodeProblem> {
