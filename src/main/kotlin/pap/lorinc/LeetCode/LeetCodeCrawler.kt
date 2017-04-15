@@ -89,7 +89,7 @@ object LeetCodeCrawler {
             }
 
     private fun parsePackage(submission: JsonObject): String = submission.string("title")!!.trim().replace(Regex("(?i)[^a-z]"), "").decapitalize()
-    private fun getDescription(solution: Document): String = solution.select("""meta[name="description"]""").attr("content").replace(Regex("[\r\n]{2,}"), "\n\n")
+    private fun getDescription(solution: Document): String = solution.select("""meta[name="description"]""").attr("content").replace(Regex("[\r\n]{2,}"), "\n")
     private fun parseLink(solution: Document): String = base + solution.select("""a[href^="/problems/"]""").first().attr("href")
     private fun getSolution(solution: Document): String {
         val code = Regex("submissionCode: '(.+)',").find(solution.select("script")[7].html())!!.groupValues[1]
