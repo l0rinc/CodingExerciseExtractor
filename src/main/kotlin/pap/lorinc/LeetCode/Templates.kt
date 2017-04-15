@@ -6,7 +6,7 @@ fun generateCommands(contents: List<LeetCodeProblem>) = {
     val userName = userId.replace(Regex("@.+$"), "")
     val languages = contents.map { it.language.toString().toLowerCase() }.toSet().joinToString(",")
     if ("java" != languages) throw IllegalStateException("Only Java is supported for now!")
-    val sourcesFolder = "src/main/${languages.first()}/leetcode/"
+    val sourcesFolder = "src/main/${languages}/leetcode/"
 
     val before = """
         >
