@@ -54,7 +54,17 @@ val library = mapOf<String, String>(
         >
         >public class VersionControl {
         >    public boolean isBadVersion(int version) { throw new IllegalStateException(); }
-        >}"""
+        >}""",
+
+        "TreeLinkNode" to """
+        >package leetcode;
+        >
+        >public class TreeLinkNode {
+        >    public int val;
+        >    public TreeLinkNode left, right, next;
+        >    public TreeLinkNode(int val) { this.val = val; }
+        >}
+>"""
 ).mapValues { it.value.trimMargin(">").replace("\n", "\\n") }
 
 
