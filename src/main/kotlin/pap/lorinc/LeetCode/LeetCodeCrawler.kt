@@ -1,6 +1,9 @@
 package pap.lorinc.LeetCode
 
-import com.beust.klaxon.*
+import com.beust.klaxon.JsonObject
+import com.beust.klaxon.Parser
+import com.beust.klaxon.array
+import com.beust.klaxon.string
 import org.jsoup.Connection
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -21,44 +24,36 @@ object LeetCodeCrawler {
     }
 
     private fun parseContent(cookies: MutableMap<String, String>): List<LeetCodeProblem> {
-        val visited = hashSetOf<String>()
-        val results = mutableListOf<LeetCodeProblem>()
-        for (page in 1..maxPageCount) {
-            val parsedSubmissions = submissions(page, cookies)
-
-            val solutions = solutions(cookies, parsedSubmissions, visited)
-            results.addAll(solutions)
-
-            if (parsedSubmissions.boolean("has_next") != true)
-                break
-
-            println("Page $page complete with: ${solutions.map { "'${it.name}'" }.joinToString(",")}")
-        }
+        val parsedSubmissions = submissions(cookies)
+        val results = solutions(cookies, parsedSubmissions)
+        println("$maxSubmissionCount submissions crawled, found: ${results.map { "'${it.name}'" }.joinToString(",")}")
         return results.reversed()
     }
 
-    private fun solutions(cookies: MutableMap<String, String>, parsedSubmissions: JsonObject, visited: HashSet<String>): List<LeetCodeProblem> =
-            parsedSubmissions.array<JsonObject>("submissions_dump")!!
-                    .filter { s -> s.string("status_display") == "Accepted" }
-                    .filter { s -> visited.add(s.string("title")!!) }
-                    .map { submission ->
-                        val solution = Jsoup.connect(base + submission.string("url")).cookies(cookies).get()
-                        val input = submission.string("time")!!
-                        LeetCodeProblem(
-                                submitTime = parseDuration(input, LocalDateTime.now()),
-                                packageName = parsePackage(submission),
-                                link = parseLink(solution),
-                                description = getDescription(solution),
-                                solution = getSolution(solution),
-                                name = getName(submission),
-                                runTime = getRunTime(submission),
-                                language = parseLanguage(submission)
-                        )
-                    }
+    private fun solutions(cookies: MutableMap<String, String>, parsedSubmissions: JsonObject): List<LeetCodeProblem> {
+        val visited = hashSetOf<String>()
+        return parsedSubmissions.array<JsonObject>("submissions_dump")!!
+                .filter { s -> s.string("status_display") == "Accepted" }
+                .filter { s -> visited.add(s.string("title")!!) }
+                .map { submission ->
+                    val solution = Jsoup.connect(base + submission.string("url")).cookies(cookies).get()
+                    val input = submission.string("time")!!
+                    LeetCodeProblem(
+                            submitTime = parseDuration(input, LocalDateTime.now()),
+                            packageName = parsePackage(submission),
+                            link = parseLink(solution),
+                            description = getDescription(solution),
+                            solution = getSolution(solution),
+                            name = getName(submission),
+                            runTime = getRunTime(submission),
+                            language = parseLanguage(submission)
+                    )
+                }
+    }
 
-    private fun submissions(page: Int, cookies: MutableMap<String, String>): JsonObject {
+    private fun submissions(cookies: MutableMap<String, String>): JsonObject {
         val submissions = Jsoup
-                .connect("$base/api/submissions/my/$page/?format=json")
+                .connect("$base/api/submissions/?format=json&offset=0&limit=$maxSubmissionCount")
                 .cookies(cookies)
                 .ignoreContentType(true)
                 .get().body().text()
