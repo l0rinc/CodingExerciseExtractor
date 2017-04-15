@@ -30,7 +30,7 @@ fun generateCommands(contents: List<LeetCodeProblem>) = {
     val after = """
         >
         >
-        >${library.map { "\n>echo('${it.value.replace("\n", "\\n")}') > $sourcesFolder/${it.key}.java" }.joinToString()}
+        >${library.map { "\n>echo('${it.value}') > $sourcesFolder/${it.key}.java" }.joinToString()}
         >
         >${Utils.echo("to install gradle, type: sudo add-apt-repository ppa:cwchien/gradle && sudo apt-get update && sudo apt-get install gradle")}
         >${Utils.echo("[![Build Status](https://travis-ci.org/$userName/LeetCodeSolutions.png)](https://travis-ci.org/$userName/LeetCodeSolutions)\n\nSolutions to my [LeetCode](http://LeetCode.com) exercises, exported by [CodingExerciseExtractor](https://github.com/paplorinc/CodingExerciseExtractor).")} > README.md

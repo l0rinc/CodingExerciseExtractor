@@ -55,6 +55,6 @@ val library = mapOf<String, String>(
         >public class VersionControl {
         >    public boolean isBadVersion(int version) { throw new IllegalStateException(); }
         >}"""
-).mapValues { it.value.trimMargin(">") }
+).mapValues { it.value.trimMargin(">").replace("\n", "\\n") }
 
 
